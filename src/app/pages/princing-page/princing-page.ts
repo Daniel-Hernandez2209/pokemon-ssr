@@ -5,4 +5,4 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './princing-page.html',
 })
-export class PrincingPage {}
+export default class PrincingPage {}
