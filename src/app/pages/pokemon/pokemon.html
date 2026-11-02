@@ -1,0 +1,40 @@
+@if (pokemons() === null) {
+  <section class="flex flex-col items-center justify-center w-full">
+    <div class="flex flex-col items-center justify-center w-full">
+      <h1 class="text-4xl font-bold">Loading...</h1>
+    </div>
+  </section>
+} @else {
+  @let mypokemon = pokemons()!;
+  <section class="flex flex-col items-center justify-center w-full">
+    <div class="flex flex-col items-center justify-center w-full">
+      <h1 class="text-4xl font-bold">{{ mypokemon.name }}</h1>
+    </div>
+  </section>
+  <section class="flex flex-col items-center justify-center w-full">
+    <div class="flex flex-col items-center justify-center w-full">
+      <img
+        [src]="mypokemon.sprites.other?.['official-artwork']?.front_default"
+        [alt]="mypokemon.name"
+        class="w-64 h-64"
+        height="256px"
+        width="256px"
+      />
+      @if (mypokemon.cries.latest !== null) {
+        <audio controls autoplay>
+          <source [src]="mypokemon.cries.latest" type="audio/wav" />
+        </audio>
+      }
+    </div>
+  </section>
+  <section class="flex flex-col items-center justify-center w-full">
+    <div class="flex flex-col items-center justify-center w-full">
+      <h2 class="text-2xl font-bold">Abilities</h2>
+      <ul class="list-disc list-inside">
+        @for (ability of mypokemon.abilities; track ability.ability!.name) {
+          <li class="text-lg">{{ ability.ability!.name }}</li>
+        }
+      </ul>
+    </div>
+  </section>
+}

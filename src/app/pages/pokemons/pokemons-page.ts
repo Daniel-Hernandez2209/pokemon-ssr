@@ -11,6 +11,10 @@ import { PokemonsList } from '../../pokemons/components/pokemons-list/pokemons-l
 import { PokemonListEskeleton } from './ui/pokemon-list-eskeleton/pokemon-list-eskeleton';
 import { Pokemons } from '../../pokemons/services/pokemons';
 import { simplePageInterface } from '../../pokemons/interface';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, tap } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'pokemons-page',
@@ -20,6 +24,9 @@ import { simplePageInterface } from '../../pokemons/interface';
 })
 export default class PokemonsPage implements OnInit {
   private pokemonsService = inject(Pokemons);
+  private activateRoute = inject(ActivatedRoute);
+  private router = inject(Router);
+  private title = inject(Title);
   public pokemons = signal<simplePageInterface[]>([]);
   isLoading = signal(true);
   /*  // hacemos referencia a aplicationRef
@@ -30,17 +37,39 @@ export default class PokemonsPage implements OnInit {
   }); */
   ngOnInit(): void {
     this.loadPage();
+
     /*     setTimeout(() => {
       this.isLoading.set(false);
     }, 1500); */
+    //this.activateRoute.queryParamMap.subscribe();
   }
   /*   ngOnDestroy(): void {
     this.$appState.unsubscribe();
     console.log('destroy');
   } */
+
+  public currenPage = toSignal<number>(
+    this.activateRoute.queryParamMap.pipe(
+      map((params) => params.get('page') || '1'),
+      map((page) => (isNaN(+page) ? 1 : +page)),
+      map((page) => Math.max(1, page)),
+    ),
+  );
+
   public loadPage(page = 0) {
-    this.pokemonsService.simplePage(page).subscribe((pokemons) => {
-      this.pokemons.set(pokemons);
-    });
+    const loadToPage = this.currenPage()! + page;
+    this.pokemonsService
+      .simplePage(loadToPage)
+      .pipe(
+        tap(() => {
+          this.router.navigate([], { queryParams: { page: loadToPage } });
+        }),
+        tap(() => {
+          this.title.setTitle(`Página  SSR page: ${loadToPage}`);
+        }),
+      )
+      .subscribe((pokemons) => {
+        this.pokemons.set(pokemons);
+      });
   }
 }
