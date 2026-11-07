@@ -12,6 +12,14 @@
   <pokemon-list-eskeleton />
 }
 <div class="flex justify-between">
-  <button (click)="loadPage(-1)" class="mt-2 cursor-pointer">Anterior</button>
-  <button (click)="loadPage(1)" class="mt-2 cursor-pointer">Siguiente</button>
+  <button
+    [routerLink]="['/pokemons/page', currenPage()! - 1]"
+    [disabled]="currenPage() === 1"
+    class="mt-2 cursor-pointer"
+  >
+    Anterior
+  </button>
+  <button [routerLink]="['/pokemons/page', currenPage()! + 1]" class="mt-2 cursor-pointer">
+    Siguiente
+  </button>
 </div>

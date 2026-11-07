@@ -2,6 +2,7 @@ import {
   ApplicationRef,
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
   OnDestroy,
   OnInit,
@@ -11,14 +12,14 @@ import { PokemonsList } from '../../pokemons/components/pokemons-list/pokemons-l
 import { PokemonListEskeleton } from './ui/pokemon-list-eskeleton/pokemon-list-eskeleton';
 import { Pokemons } from '../../pokemons/services/pokemons';
 import { simplePageInterface } from '../../pokemons/interface';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, tap } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'pokemons-page',
-  imports: [PokemonsList, PokemonListEskeleton],
+  imports: [PokemonsList, PokemonListEskeleton, RouterLink],
   templateUrl: './pokemons-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -48,9 +49,18 @@ export default class PokemonsPage implements OnInit {
     console.log('destroy');
   } */
 
+  public loadOnPageChange = effect(
+    () => {
+      this.loadPage(this.currenPage());
+    },
+    {
+      allowSignalWrites: true,
+    },
+  );
+
   public currenPage = toSignal<number>(
-    this.activateRoute.queryParamMap.pipe(
-      map((params) => params.get('page') || '1'),
+    this.activateRoute.params.pipe(
+      map((params) => params['page'] || '1'),
       map((page) => (isNaN(+page) ? 1 : +page)),
       map((page) => Math.max(1, page)),
     ),
@@ -61,9 +71,9 @@ export default class PokemonsPage implements OnInit {
     this.pokemonsService
       .simplePage(loadToPage)
       .pipe(
-        tap(() => {
+        /*         tap(() => {
           this.router.navigate([], { queryParams: { page: loadToPage } });
-        }),
+        }), */
         tap(() => {
           this.title.setTitle(`Página  SSR page: ${loadToPage}`);
         }),
